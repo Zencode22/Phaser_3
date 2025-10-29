@@ -8,6 +8,13 @@ export class Game extends Phaser.Scene {
         this.ballTrail;
         this.brickEmitters;
         this.cursors;
+        this.lives = 3; // Add lives counter
+        this.livesText; // Add text display for lives
+    }
+
+    init() {
+        // Reset lives when the scene starts (including on restart)
+        this.lives = 3;
     }
 
     create() {
@@ -65,13 +72,21 @@ export class Game extends Phaser.Scene {
 
         this.paddle = this.physics.add.image(512, 700, 'assets', 'paddle1').setImmovable();
 
+        // Add lives text display
+        this.livesText = this.add.text(16, 16, 'Lives: ' + this.lives, {
+            fontSize: '32px',
+            fill: '#fff',
+            fontFamily: 'Arial Black',
+            stroke: '#000',
+            strokeThickness: 4
+        });
+
         //  Our colliders
         this.physics.add.collider(this.ball, this.bricks, this.hitBrick, null, this);
         this.physics.add.collider(this.ball, this.paddle, this.hitPaddle, null, this);
 
         //  Initialize keyboard input
         this.cursors = this.input.keyboard.createCursorKeys();
-
     }
 
     hitBrick(ball, brick) {
@@ -86,6 +101,9 @@ export class Game extends Phaser.Scene {
         });
 
         if (this.bricks.countActive() === 0) {
+            // Award extra life when all bricks are destroyed
+            this.lives++;
+            this.updateLivesText();
             this.resetLevel();
         }
     }
@@ -100,9 +118,7 @@ export class Game extends Phaser.Scene {
         this.resetBall();
 
         this.bricks.children.each(brick => {
-
             brick.enableBody(false, 0, 0, true, true);
-
         });
     }
 
@@ -136,6 +152,23 @@ export class Game extends Phaser.Scene {
         });
     }
 
+    updateLivesText() {
+        this.livesText.setText('Lives: ' + this.lives);
+    }
+
+    loseLife() {
+        this.lives--;
+        this.updateLivesText();
+        
+        if (this.lives <= 0) {
+            // Game over when no lives remain
+            this.scene.start('GameOver');
+        } else {
+            // Reset ball if player still has lives
+            this.resetBall();
+        }
+    }
+
     update() {
         // Handle paddle movement with arrow keys
         if (this.cursors.left.isDown) {
@@ -162,7 +195,7 @@ export class Game extends Phaser.Scene {
         }
 
         if (this.ball.y > 768) {
-            this.resetBall();
+            this.loseLife();
         }
     }
 }

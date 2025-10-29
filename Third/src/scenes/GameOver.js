@@ -14,5 +14,21 @@ export class GameOver extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5);
 
+        // Add restart instruction
+        this.add.text(512, 450, 'Press SPACE to restart', {
+            fontFamily: 'Arial', fontSize: 32, color: '#ffffff',
+            stroke: '#000000', strokeThickness: 4,
+            align: 'center'
+        }).setOrigin(0.5);
+
+        // Set up restart key
+        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    }
+
+    update() {
+        if (this.spacebar.isDown) {
+            // Restart the game
+            this.scene.start('Game');
+        }
     }
 }
